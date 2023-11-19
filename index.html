@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <!-- META DEFINITION -->
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#1F1D2B" />
+        <meta name="msapplication-navbutton-color" content="#1F1D2B" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="#1F1D2B" />
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="Training intermediate programmer" />
+        <meta name="keywords" content="Neuron, training, programmer" />
+        <!-- END META DEFINITION -->
+
+        <title>Ecommerce</title>
+
+        <!-- BOOTSTRAP STYLE -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+        <!-- END BOOTSTRAP STYLE -->
+
+        <!-- Custom style -->
+        <link href="assets/style.css" rel="stylesheet" type="text/css" />
+        <!-- End Custom style -->
+    </head>
+    <body>
+
+        <div class="container">
+            <div class="row">
+                
+                <div class="col-lg-8">
+                    <div class="py-4">
+
+                        <h3>Choose product</h3>
+                        <p>Total product: <span id="totalProduct">0 item(s)</spa></p>
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Categorize</th>
+                                        <th>Price</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="catalogueRow">
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="py-4">
+
+                        <h3>Your cart</h3>
+                        <p>Total cost: <strong id="purchasedItemCost">Rp 0</strong></p>
+
+                        <div class="form-group mb-3">
+                            <!-- Coupon code: GETX5K -->
+                            <label class="mb-1">Use coupon to get extra discount</label>
+                            <input type="text" placeholder="Enter code and press enter" class="form-control" id="couponText" onkeydown="getExtraDiscount(event, this)"/>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Product.</th>
+                                        <th>Qty</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cartRow">
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <button class="btn btn-primary btn-xl w-100" onClick="checkout(this)">Checkout</button>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Checkout dialog -->
+        <div class="modal" id="checkoutModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Successfully checkout</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="mb-0">Total cost: <span id="totalToPay">Rp 0</span></p>
+                        <p class="mb-0">Shipping cost: <span id="totalShippingCost">Rp 0</span> (<span id="totalShippingWeight">0</span> kg)</p>
+                        <p class="mb-0" id="couponStatus"></p>
+                        <h4 id="grandTotal" class="text-bold"></h4>
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Product.</th>
+                                        <th>Qty</th>
+                                        <th>Subtotal</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="checkoutRow">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+            // user variable
+            const userdata = {
+                'username': 'gterryus',
+                'first_name': 'Terryus',
+                'last_name': 'gunawan'
+            };
+
+            // product variable
+            const product = [
+                {
+                    'id': 1,
+                    'detail': {
+                        'name': 'Cholesterol T-Shirt',
+                        'description': 'This was a T-Shirt for people love cholesterol.',
+                        'categorize': 'fashion'
+                    },
+                    'price': 200000,
+                    'discount': 15,
+                    'stock': 100,
+                    'weight': 1
+                },
+                {
+                    'id': 2,
+                    'detail': {
+                        'name': 'Fatman T-Shirt',
+                        'description': 'This was a T-Shirt for people love Fatman.',
+                        'categorize': 'fashion'
+                    },
+                    'price': 250000,
+                    'discount': 12,
+                    'stock': 100,
+                    'weight': 1
+                },
+                {
+                    'id': 3,
+                    'detail': {
+                        'name': 'Good & Bad Fat T-Shirt',
+                        'description': 'Bad Fat is a Good Fat that hurts.',
+                        'categorize': 'fashion'
+                    },
+                    'price': 180000,
+                    'discount': 8,
+                    'stock': 100,
+                    'weight': 1
+                },
+                {
+                    'id': 4,
+                    'detail': {
+                        'name': 'Hungry a lot T-Shirt',
+                        'description': 'Cloth for people always hungry.',
+                        'categorize': 'fashion'
+                    },
+                    'price': 125000,
+                    'discount': 0,
+                    'stock': 100,
+                    'weight': 1
+                }
+            ];
+
+            // stored product in cart variable
+            const storedItem = [
+                {
+                    'id': 2,
+                    'detail': {
+                        'name': 'Fatman T-Shirt',
+                        'categorize': 'fashion'
+                    },
+                    'price': 220000,
+                    'weight': 3,
+                    'qty': 3
+                }
+            ];
+
+            const costPurchasedItem = 0;
+            const couponSet = 5000;
+            const shippingCost = 15000;
+
+            // Store to local storage
+            localStorage.setItem('product', JSON.stringify(product));
+            localStorage.setItem('storedItem', JSON.stringify(storedItem));
+            localStorage.setItem('userdata', JSON.stringify(userdata));
+            localStorage.setItem('storedCostPurchasedItem', JSON.stringify(costPurchasedItem));
+            localStorage.setItem('coupon', JSON.stringify(false));
+
+            // Currency format - thousand separator with comma
+            const currencyFormat = (x) => {
+                return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            }
+
+            // Calculate shipping cost
+            const getShippingCost = (totalWeight) => {
+                return totalWeight * shippingCost;
+            }
+
+            // Calculate discount arrow function
+            const calculateDiscount = (originalPrice, discountPercentage) => {
+                // Ensure the discount percentage is a valid number
+                if (typeof originalPrice === 'number' && typeof discountPercentage === 'number') {
+                    // Calculate the discounted price
+                    const discountAmount = (originalPrice * discountPercentage) / 100;
+                    const discountedPrice = originalPrice - discountAmount;
+
+                    return discountedPrice;
+                } else {
+                    // Handle invalid input
+                    console.error('Invalid input. Both originalPrice and discountPercentage should be numbers.');
+                    return null;
+                }
+            };
+
+            // calculate total discount coupon using functional scope
+            function getPercentageDiscount(totalPrice, coupon){
+                let returns = (coupon / totalPrice) * 100;
+                return returns.toFixed(2);
+            }
+            
+            // Set purchased grand total
+            document.getElementById('purchasedItemCost').innerHTML = 'Rp ' + currencyFormat(costPurchasedItem);
+
+            // append product catalog
+            const getItem = () => {
+                let returns = [];
+                let listProductLocal = JSON.parse(localStorage.getItem('product'));
+
+                for(let i = 0; i < listProductLocal.length; i++) {
+                    let row = listProductLocal[i];
+
+                    let newPrice = row.price;
+                    let newPriceFormatted = currencyFormat(newPrice);
+                    let newDiscountPrice = calculateDiscount(newPrice, row.discount);
+                    let newDiscountPriceFormatted = currencyFormat(calculateDiscount(newPrice, row.discount));
+
+                    let data = `<td>${ row.detail.name }</td>
+                                <td style="width:150px;">${ row.detail.categorize }</td>
+                                ${ row.discount === 0 ? `<td style="width:150px;"><p class="mb-0">${ 'Rp ' + newPriceFormatted }</p></td>` : `<td style="width:150px;"><p class="mb-1">${ 'Rp ' + newDiscountPriceFormatted } (${ row.discount }%)</p><small class="mb-0"><strike>${ 'Rp ' + newPriceFormatted }</strike></small></td>` }
+                                <td align="center"><button class="btn btn-sm btn-primary" onclick="addToCart(this)" item-id="${ row.id }" item-name="${ row.detail.name }" item-categorize="${ row.detail.categorize }" item-price="${ (row.discount === 0 ? newPrice : newDiscountPrice) }" item-weight="${ row.weight }">Add</button></td>`;
+                    returns.push(`<tr>${data}</tr>`);
+                }
+
+                document.getElementById('totalProduct').innerHTML = listProductLocal.length + ' items';
+                return returns.join('');
+            }
+
+            const listItemRow = document.getElementById('catalogueRow');
+            listItemRow.innerHTML = getItem();
+
+            // append stored item to cart
+            const getCartItem = () => {
+                let returns = [];
+                let productCost = 0;
+                let listStoredItemLocal = JSON.parse(localStorage.getItem('storedItem'));
+                let couponStatus = JSON.parse(localStorage.getItem('coupon'));
+
+                for(let i = 0; i < listStoredItemLocal.length; i++) {
+                    let row = listStoredItemLocal[i];
+                    
+                    let newPrice = row.price;
+                    let newPriceFormatted = currencyFormat(newPrice);
+                    let newSubtotalPrice = newPrice * row.qty;
+                    let newSubtotalPriceFormatted = currencyFormat(newPrice * row.qty);
+
+                    let data = `<td>
+                                    <p class="mb-0">Name: ${ row.detail.name }</p>
+                                    <p class="mb-0">Categorize: ${ row.detail.categorize }</p>
+                                    <p class="mb-0">Price: ${ 'Rp ' + newPriceFormatted }</p>
+                                    <p class="mb-0">Subtotal: <strong>${ 'Rp ' + newSubtotalPriceFormatted }</strong></p>
+                                </td>
+                                <td>${ row.qty }</td>
+                                <td align="center" style="width:110px;">
+                                    <button class="btn btn-sm w-100 btn-warning mb-1" onclick="removeQuantity(this)" item-id="${ row.id }">Remove</button>
+                                    <button class="btn btn-sm w-100 btn-danger" onclick="dropFromCart(this)" item-id="${ row.id }">Drop item</button>
+                                </td>`;
+
+                    productCost += newSubtotalPrice;
+                    returns.push(`<tr>${data}</tr>`);
+                }
+
+                localStorage.setItem('storedItem', JSON.stringify(listStoredItemLocal));
+
+                let updatedProductCost = (couponStatus ? (productCost - couponSet) : productCost);
+                let updatedProductCostFormatted = (couponStatus ? `Rp ${currencyFormat(productCost - couponSet)} (${ getPercentageDiscount(productCost, couponSet) }%)` : `Rp ${currencyFormat(productCost)}`);
+
+                localStorage.setItem('storedCostPurchasedItem', JSON.stringify(updatedProductCost));
+                document.getElementById('purchasedItemCost').innerHTML = updatedProductCostFormatted;
+
+                return returns.join('');
+            }
+
+            const listItemCartRow = document.getElementById('cartRow');
+            listItemCartRow.innerHTML = getCartItem();
+
+            // Check item id in cart
+            const issetCartItem = (iId) => {
+                let listStoredItemLocal = JSON.parse(localStorage.getItem('storedItem'));
+                return listStoredItemLocal.some(data => data.id === iId);
+            }
+
+            // Add to cart action
+            const addToCart = (button) => {
+                let iId = parseInt(button.getAttribute('item-id'));
+                let iName = button.getAttribute('item-name');
+                let iCategorize = button.getAttribute('item-categorize');
+                let iPrice = parseInt(button.getAttribute('item-price'), 10);
+                let iWeight = parseInt(button.getAttribute('item-weight'), 10);
+                
+                let listStoredItemLocal = JSON.parse(localStorage.getItem('storedItem'));
+
+                if (issetCartItem(iId)) {
+                    // exist product in cart 
+                    let targetItem = listStoredItemLocal.find(data => data.id === iId);
+
+                    if (targetItem) {
+                        targetItem.qty += 1;
+                        targetItem.weight += 1;
+
+                        localStorage.setItem('storedItem', JSON.stringify(listStoredItemLocal));
+
+                        document.getElementById('cartRow').innerHTML = getCartItem();
+
+                        alert(`${iName} quantities has been updated!`);
+                    }else{
+                        alert(`Item with ID ${iId} not found in local storage.`);
+                    }
+
+                } else {
+                    // product are not exist in cart
+                    let newData = {
+                        'id': iId,
+                        'detail': {
+                            'name': iName,
+                            'categorize': iCategorize
+                        },
+                        'price': iPrice,
+                        'weight': 1,
+                        'qty': 1
+                    };
+
+                    listStoredItemLocal.push(newData);
+                    localStorage.setItem('storedItem', JSON.stringify(listStoredItemLocal));
+
+                    document.getElementById('cartRow').innerHTML = getCartItem();
+
+                    alert(`1 pcs of ${iName} has been added!`);
+                }
+            }
+
+            // Remove quantity of item from cart
+            const removeQuantity = (button) => {
+                let iId = parseInt(button.getAttribute('item-id'));
+
+                let listStoredItemLocal = JSON.parse(localStorage.getItem('storedItem'));
+
+                if (issetCartItem(iId)) {
+                    // exist product in cart 
+                    let targetItem = listStoredItemLocal.find(data => data.id === iId);
+
+                    if (targetItem) {
+                        targetItem.qty -= 1;
+                        targetItem.weight -= 1;
+
+                        // Remove the item if quantity becomes zero
+                        if (targetItem.qty === 0) {
+                            const indexToRemove = listStoredItemLocal.findIndex(data => data.id === iId);
+                            if (indexToRemove !== -1) {
+                                listStoredItemLocal.splice(indexToRemove, 1);
+                            }
+                        }
+
+                        localStorage.setItem('storedItem', JSON.stringify(listStoredItemLocal));
+
+                        document.getElementById('cartRow').innerHTML = getCartItem();
+
+                        alert(`Quantities has been updated!`);
+                    }else{
+                        alert(`There is something wrong when removing item with ID ${iId}.`);
+                    }
+                }else{
+                    // Un-exist product in cart 
+                    alert(`There is something wrong when fetching local storage cart data.`);
+                }
+            }
+
+            // drop entire quantity of item from cart
+            const dropFromCart = (button) => {
+                let iId = parseInt(button.getAttribute('item-id'));
+
+                let listStoredItemLocal = JSON.parse(localStorage.getItem('storedItem'));
+
+                if (issetCartItem(iId)) {
+                    // exist product in cart 
+                    let targetItem = listStoredItemLocal.find(data => data.id === iId);
+
+                    if (targetItem) {
+                        targetItem.qty = 0;
+
+                        // Remove the item if quantity becomes zero
+                        if (targetItem.qty === 0) {
+                            const indexToRemove = listStoredItemLocal.findIndex(data => data.id === iId);
+                            if (indexToRemove !== -1) {
+                                listStoredItemLocal.splice(indexToRemove, 1);
+                            }
+                        }
+
+                        localStorage.setItem('storedItem', JSON.stringify(listStoredItemLocal));
+
+                        document.getElementById('cartRow').innerHTML = getCartItem();
+
+                        alert(`Item has been drop from cart!`);
+                    }else{
+                        alert(`There is something wrong when droping item with ID ${iId}.`);
+                    }
+                }else{
+                    // Un-exist product in cart 
+                    alert(`There is something wrong when fetching local storage cart data.`);
+                }
+            }
+
+            // Extra coupon discount
+            const getExtraDiscount = (event, field) => {
+                if (event.key === 'Enter') {
+                    couponCode = field.value;
+
+                    if(couponCode === "GETX5K"){
+                        alert(`Congratulations! you get extra Rp ${ currencyFormat(couponSet) } discount!`);
+
+                        let productCost = JSON.parse(localStorage.getItem('storedCostPurchasedItem'));
+
+                        let returnsNewCost = productCost - couponSet;
+
+                        localStorage.setItem('coupon', true);
+                        localStorage.setItem('storedCostPurchasedItem', JSON.stringify(returnsNewCost));
+                        
+                        document.getElementById('purchasedItemCost').innerHTML = `Rp ${currencyFormat(returnsNewCost)} (${getPercentageDiscount(productCost, couponSet)}%)`;
+                        field.setAttribute('disabled', 'disabled');
+                    }else{
+                        alert(`Coupon code is not expired or not found in our system.`);
+                        field.value = '';
+                        field.focus();
+                    }
+                }
+            }
+        </script>
+
+        <!-- BOOTSTRAP JS + POPPER -->
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js" integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+" crossorigin="anonymous"></script>
+        <!-- END BOOTSTRAP JS + POPPER -->
+
+        <script type="text/javascript">
+            const myModal = new bootstrap.Modal('#checkoutModal', {
+                keyboard: false
+            })
+
+            const checkout = (button) => {
+                const returns = [];
+                let getStoredData = JSON.parse(localStorage.getItem('storedItem'));
+                let productCost = JSON.parse(localStorage.getItem('storedCostPurchasedItem'));
+                let couponStatus = JSON.parse(localStorage.getItem('coupon'));
+                let assignedProductCost = productCost;
+
+                let setShippingCost = 0;
+                let totalWeight = 0;
+                
+                document.getElementById('totalToPay').innerHTML = `Rp ${currencyFormat(productCost)}`;
+
+                let setCouponStatus = (couponStatus ? '' : 'display:none;');
+                document.getElementById('couponStatus').setAttribute('style', setCouponStatus);
+                document.getElementById('couponStatus').innerHTML = `Congratulations you get discount about <span>${getPercentageDiscount(productCost, couponSet)}%</span>`;
+
+                for(let i = 0; i < getStoredData.length; i++) {
+                    let row = getStoredData[i];
+                    
+                    let newPrice = row.price;
+                    let newPriceFormatted = currencyFormat(newPrice);
+                    let newSubtotalPrice = newPrice * row.qty;
+                    let newSubtotalPriceFormatted = currencyFormat(newPrice * row.qty);
+
+                    let data = `<td>
+                                    <p class="mb-0">Name: ${ row.detail.name }</p>
+                                    <p class="mb-0">Categorize: ${ row.detail.categorize }</p>
+                                    <p class="mb-0">Price: ${ 'Rp ' + newPriceFormatted }</p>
+                                </td>
+                                <td>${ row.qty }</td>
+                                <td align="right"><strong>${ 'Rp ' + newSubtotalPriceFormatted }</strong></td>`;
+
+                    totalWeight += row.weight;
+                    productCost += newSubtotalPrice;
+                    returns.push(`<tr>${data}</tr>`);
+                }
+
+                let newShippingCost = getShippingCost(totalWeight);
+                let grandTotal = assignedProductCost + newShippingCost;
+
+                document.getElementById('totalShippingCost').innerHTML = currencyFormat(newShippingCost);
+                document.getElementById('totalShippingWeight').innerHTML = totalWeight;
+                document.getElementById('grandTotal').innerHTML = `Total to pay Rp ${currencyFormat(grandTotal)}`;
+
+                document.getElementById('checkoutRow').innerHTML = returns.join('');
+
+                myModal.show()
+
+            }
+        </script>
+    </body>
+</html>
